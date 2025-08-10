@@ -27,6 +27,7 @@
           - certbot
           - certbot-dns-dynu
         state: present
+        extra_args: --break-system-packages # Add this flag
       delegate_to: "{{ remote_user }}@{{ target_host }}"
 
     - name: Manage Certbot process
