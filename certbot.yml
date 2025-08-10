@@ -10,7 +10,7 @@
     certbot_executable: "/home/{{ remote_user }}/.local/bin/certbot"
     dynu_api_key: "{{ lookup('env', 'DYNU_API_KEY') }}"
     domain_name: "trinetra.camdvr.org"
-    email_address: "your-email@example.com" # TODO: Replace with your email
+    email_address: "gurucp2005@gmail.com" # TODO: Replace with your email
 
   tasks:
     - name: Ensure python3-pip is installed on the target
@@ -48,6 +48,7 @@
               -d {{ domain_name }}
               --agree-tos
               --email {{ email_address }}
+          become: yes
           delegate_to: "{{ remote_user }}@{{ target_host }}"
 
       always:
