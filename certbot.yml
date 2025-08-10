@@ -7,9 +7,8 @@
     target_host: "trinetra.home.arpa"
     remote_user: "ciadmin"
     credentials_file_path: "/home/ciadmin/dynu-credentials.ini"
-    certbot_executable: "/home/{{ remote_user }}/.local/bin/certbot"
     dynu_api_key: "{{ lookup('env', 'DYNU_API_KEY') }}"
-    domain_name: "trinetra.camdvr.org"
+    domain_name: "trinetra.camdvr.org" # TODO: Replace with your domain name
     email_address: "gurucp2005@gmail.com" # TODO: Replace with your email
 
   tasks:
@@ -27,7 +26,7 @@
           - certbot
           - certbot-dns-dynu
         state: present
-        extra_args: --break-system-packages # Add this flag
+        extra_args: --break-system-packages
       delegate_to: "{{ remote_user }}@{{ target_host }}"
 
     - name: Manage Certbot process
@@ -42,13 +41,13 @@
         - name: Run Certbot on target
           ansible.builtin.command:
             cmd: >
-              {{ certbot_executable }} certonly
+              python3 -m certbot certonly
               --authenticator dns-dynu
               --dns-dynu-credentials {{ credentials_file_path }}
               -d {{ domain_name }}
               --agree-tos
               --email {{ email_address }}
-          become: yes
+          become: yes # Run Certbot with sudo
           delegate_to: "{{ remote_user }}@{{ target_host }}"
 
       always:
