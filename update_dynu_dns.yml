@@ -1,0 +1,44 @@
+---
+- name: Update Dynu DNS with IPv6 address
+  hosts: trinetra.home.arpa
+  remote_user: ciadmin
+  gather_facts: no
+
+  vars:
+    # These are now configured with your specific IDs
+    dynu_api_key: "{{ lookup('env', 'DYNU_API_KEY') }}"
+    dynu_domain_id: "12314544"
+    dynu_record_id: "14978346"
+
+  tasks:
+    - name: Get current DNS record from Dynu
+      ansible.builtin.uri:
+        url: "https://api.dynu.com/v2/dns/{{ dynu_domain_id }}/record/{{ dynu_record_id }}"
+        method: GET
+        headers:
+          "API-Key": "{{ dynu_api_key }}"
+      register: current_dns_record
+
+    - name: Get local IPv6 address
+      ansible.builtin.shell: "ip -6 addr show scope global | awk '/inet6/ {print $2}' | cut -d'/' -f1"
+      register: ipv6_result
+      changed_when: false
+
+    - name: Set local IPv6 address fact
+      ansible.builtin.set_fact:
+        local_ipv6_address: "{{ ipv6_result.stdout }}"
+
+    - name: Update Dynu DNS record if IP has changed
+      ansible.builtin.uri:
+        url: "https://api.dynu.com/v2/dns/{{ dynu_domain_id }}/record/{{ dynu_record_id }}"
+        method: POST
+        headers:
+          "API-Key": "{{ dynu_api_key }}"
+          "Content-Type": "application/json"
+        body_format: json
+        body: "{{ current_dns_record.json | combine({'ipv6_address': local_ipv6_address}) }}"
+      when: >
+        current_dns_record.json.ipv6_address is defined and
+        current_dns_record.json.ipv6_address != local_ipv6_address and
+        local_ipv6_address is defined and
+        local_ipv6_address != ""
