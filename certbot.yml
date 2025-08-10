@@ -8,6 +8,7 @@
     remote_user: "ciadmin"
     credentials_file_path: "/home/ciadmin/dynu-credentials.ini"
     dynu_api_key: "{{ lookup('env', 'DYNU_API_KEY') }}"
+    certbot_executable: "/home/{{ remote_user }}/.local/bin/certbot"
     domain_name: "trinetra.camdvr.org" # TODO: Replace with your domain name
     email_address: "gurucp2005@gmail.com" # TODO: Replace with your email
 
@@ -41,7 +42,7 @@
         - name: Run Certbot on target
           ansible.builtin.command:
             cmd: >
-              python3 -m certbot certonly
+              {{ certbot_executable }} certonly
               --authenticator dns-dynu
               --dns-dynu-credentials {{ credentials_file_path }}
               -d {{ domain_name }}
