@@ -1,0 +1,40 @@
+---
+- name: Request/Renew Let's Encrypt SSL certificate
+  hosts: localhost
+  gather_facts: no
+
+  vars:
+    target_host: "trinetra.home.arpa"
+    remote_user: "ciadmin"
+    credentials_file_path: "/home/ciadmin/dynu-credentials.ini"
+    dynu_api_key: "{{ lookup('env', 'DYNU_API_KEY') }}"
+    domain_name: "trinetra.camdvr.org"
+    email_address: "gurucp2005@gmail.com" # TODO: Replace with your email
+
+  tasks:
+    - name: Manage Certbot process
+      block:
+        - name: Create temporary credentials file on target
+          ansible.builtin.copy:
+            content: "dns_dynu_auth_token = {{ dynu_api_key }}"
+            dest: "{{ credentials_file_path }}"
+            mode: '0600'
+          delegate_to: "{{ remote_user }}@{{ target_host }}"
+
+        - name: Run Certbot on target
+          ansible.builtin.command:
+            cmd: >
+              certbot certonly
+              --authenticator dns-dynu
+              --dns-dynu-credentials {{ credentials_file_path }}
+              -d {{ domain_name }}
+              --agree-tos
+              --email {{ email_address }}
+          delegate_to: "{{ remote_user }}@{{ target_host }}"
+
+      always:
+        - name: Clean up credentials file on target
+          ansible.builtin.file:
+            path: "{{ credentials_file_path }}"
+            state: absent
+          delegate_to: "{{ remote_user }}@{{ target_host }}"
