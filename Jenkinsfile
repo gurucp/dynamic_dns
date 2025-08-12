@@ -27,7 +27,7 @@ pipeline {
                         sh '''
                         ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R trinetra.home.arpa
                         ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R nataraja.home.arpa
-                        sh 'ansible-playbook -i inventory.ini update_duckdns.yml'
+                        ansible-playbook -i inventory.ini update_duckdns.yml
                         '''
                     }
                 }
