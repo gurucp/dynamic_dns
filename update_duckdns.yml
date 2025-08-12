@@ -26,7 +26,7 @@
 
     - name: Update DuckDNS for each domain (IPv6 only)
       ansible.builtin.uri:
-        url: "https://www.duckdns.org/update?domains={{ item }}&token={{ duckdns_token }}&ipv6={{ local_ipv6_address }}"
+        url: "https://www.duckdns.org/update?domains={{ item }}&token={{ duckdns_token }}&ipv6={{ local_ipv6_address | urlencode }}"
         method: GET
         return_content: true
       register: duckdns_update_result
