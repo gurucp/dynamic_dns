@@ -1,5 +1,6 @@
 ---
 - name: Update DuckDNS with IPv6 address only
+  hosts: duckdns_updater
   gather_facts: no
 
   vars:
