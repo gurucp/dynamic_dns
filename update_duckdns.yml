@@ -1,0 +1,38 @@
+---
+- name: Update DuckDNS with IPv6 address only
+  hosts: trinetra.home.arpa
+  remote_user: ciadmin
+  gather_facts: no
+
+  vars:
+    duckdns_token: "{{ lookup('env', 'DUCKDNS_TOKEN') }}"
+    duckdns_domains:
+      - cpgtrinetra
+      - cpgnataraja
+
+  tasks:
+    - name: Get local IPv6 address
+      ansible.builtin.shell: "ip -6 addr show scope global | awk '/inet6/ {print $2}' | cut -d'/' -f1 | head -n1"
+      register: ipv6_result
+      changed_when: false
+
+    - name: Set local IPv6 address fact
+      ansible.builtin.set_fact:
+        local_ipv6_address: "{{ ipv6_result.stdout }}"
+
+    - name: Fail if no IPv6 address found
+      ansible.builtin.fail:
+        msg: "No IPv6 address detected. Cannot update DuckDNS."
+      when: local_ipv6_address == ""
+
+    - name: Update DuckDNS for each domain (IPv6 only)
+      ansible.builtin.uri:
+        url: "https://www.duckdns.org/update?domains={{ item }}&token={{ duckdns_token }}&ipv6={{ local_ipv6_address }}"
+        method: GET
+        return_content: true
+      register: duckdns_update_result
+      loop: "{{ duckdns_domains }}"
+
+    - name: Show DuckDNS API responses
+      ansible.builtin.debug:
+        var: duckdns_update_result.results

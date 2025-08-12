@@ -42,7 +42,7 @@
         - name: Run Certbot on target
           ansible.builtin.command:
             cmd: >
-              {{ certbot_executable }} certonly
+              python3 -m certbot certonly
               --authenticator dns-dynu
               --dns-dynu-credentials {{ credentials_file_path }}
               -d {{ domain_name }}
