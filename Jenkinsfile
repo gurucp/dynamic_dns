@@ -24,7 +24,11 @@ pipeline {
                 withCredentials([string(credentialsId: env.DUCKDNS_TOKEN, variable: 'DUCKDNS_TOKEN')]) {
                     script {
                         echo 'Running Ansible playbook to update Dynu DNS...'
+                        sh '''
+                        ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R trinetra.home.arpa
+                        ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R nataraja.home.arpa
                         sh 'ansible-playbook -i inventory.ini update_duckdns.yml'
+                        '''
                     }
                 }
             }
