@@ -25,6 +25,8 @@ pipeline {
                     script {
                         echo 'Running Ansible playbook to update Dynu DNS...'
                         sh '''
+                            #!/bin/bash
+                            set -e
                             ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R trinetra.home.arpa || true
                             ssh-keyscan -H trinetra.home.arpa >> /var/lib/jenkins/.ssh/known_hosts
                             ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R nataraja.home.arpa || true
