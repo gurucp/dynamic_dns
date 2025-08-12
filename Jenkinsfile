@@ -25,9 +25,11 @@ pipeline {
                     script {
                         echo 'Running Ansible playbook to update Dynu DNS...'
                         sh '''
-                        ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R trinetra.home.arpa
-                        ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R nataraja.home.arpa
-                        ansible-playbook -i inventory.ini update_duckdns.yml
+                            ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R trinetra.home.arpa || true
+                            ssh-keyscan -H trinetra.home.arpa >> /var/lib/jenkins/.ssh/known_hosts
+                            ssh-keygen -f /var/lib/jenkins/.ssh/known_hosts -R nataraja.home.arpa || true
+                            ssh-keyscan -H nataraja.home.arpa >> /var/lib/jenkins/.ssh/known_hosts
+                            ansible-playbook -i inventory.ini update_duckdns.yml
                         '''
                     }
                 }
