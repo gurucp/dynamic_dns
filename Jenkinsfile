@@ -24,7 +24,7 @@ pipeline {
                 withCredentials([string(credentialsId: env.DUCKDNS_TOKEN, variable: 'DUCKDNS_TOKEN')]) {
                     script {
                         echo 'Running Ansible playbook to update Dynu DNS...'
-                        sh 'ansible-playbook update_duckdns.yml'
+                        sh 'ansible-playbook -i inventory.ini update_duckdns.yml'
                     }
                 }
             }
