@@ -1,17 +1,24 @@
 ---
 - name: Update DuckDNS with IPv6 address only
   hosts: duckdns_updater
-  gather_facts: no
+  gather_facts: yes  # We need ansible_hostname
 
   vars:
     duckdns_token: "{{ lookup('env', 'DUCKDNS_TOKEN') }}"
-    duckdns_domains:
-      - cpgtrinetra
-      - cpgnataraja
+    duckdns_map:
+      trinetra: "cpgtrinetra"
+      nataraja: "cpgnataraja"
 
   tasks:
+    - name: Fail if hostname is not mapped
+      ansible.builtin.fail:
+        msg: "No DuckDNS mapping found for host {{ ansible_hostname }}"
+      when: ansible_hostname not in duckdns_map
+
     - name: Get local IPv6 address
-      ansible.builtin.shell: "ip -6 addr show scope global | awk '/inet6/ {print $2}' | cut -d'/' -f1 | head -n1"
+      ansible.builtin.shell: >
+        ip -6 addr show scope global | awk '/inet6/ {print $2}' |
+        cut -d'/' -f1 | head -n1
       register: ipv6_result
       changed_when: false
 
@@ -24,14 +31,13 @@
         msg: "No IPv6 address detected. Cannot update DuckDNS."
       when: local_ipv6_address == ""
 
-    - name: Update DuckDNS for each domain (IPv6 only)
+    - name: Update DuckDNS for this host only
       ansible.builtin.uri:
-        url: "https://duckdns.org/update/{{ item }}&token={{ duckdns_token }}&ipv6={{ local_ipv6_address }}"
+        url: "https://www.duckdns.org/update?domains={{ duckdns_map[ansible_hostname] }}&token={{ duckdns_token }}&ipv6={{ local_ipv6_address }}"
         method: GET
         return_content: true
       register: duckdns_update_result
-      loop: "{{ duckdns_domains }}"
 
-    - name: Show DuckDNS API responses
+    - name: Show DuckDNS API response
       ansible.builtin.debug:
-        var: duckdns_update_result.results
+        var: duckdns_update_result.content
