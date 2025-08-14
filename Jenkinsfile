@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        // Define the ID of the Jenkins credential for the Dynu API key
+        // Define the ID of the Jenkins credential for the Duckdns.org API key
         DUCKDNS_TOKEN = 'DUCKDNS_TOKEN'
     }
 
@@ -23,7 +23,7 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: env.DUCKDNS_TOKEN, variable: 'DUCKDNS_TOKEN')]) {
                     script {
-                        echo 'Running Ansible playbook to update Dynu DNS...'
+                        echo 'Running Ansible playbook to update Dynamic DNS...'
                         sh '''
                             #!/bin/bash
                             set -e

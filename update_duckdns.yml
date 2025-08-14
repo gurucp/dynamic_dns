@@ -17,14 +17,18 @@
 
     - name: Get local IPv6 address
       ansible.builtin.shell: >
-        ip -6 addr show scope global | awk '/inet6/ {print $2}' |
-        cut -d'/' -f1 | head -n1
+       ip -6 addr show scope global |
+       awk '/inet6/ {print $2}' |
+       cut -d'/' -f1 |
+       head -n1 | 
+       tr -d '[:space:]'
+
       register: ipv6_result
       changed_when: false
 
     - name: Set local IPv6 address fact
       ansible.builtin.set_fact:
-        local_ipv6_address: "{{ ipv6_result.stdout | regex_replace('\\s+', '') }}"
+        local_ipv6_address: "{{ ipv6_result.stdout | trim }}"
 
     - name: Fail if no IPv6 address found
       ansible.builtin.fail:
